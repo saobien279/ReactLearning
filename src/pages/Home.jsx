@@ -8,9 +8,9 @@ function Home({ products }) {
 
             <h3>Sản phẩm hết hàng</h3>
             <ul>
-                {products.filter((item) => item.stock === 0).map((item) => (
+                {products.filter((item) => item.stockQuantity === 0).map((item) => (
                     <li key={item.id}>
-                        {item.name} - Tồn kho: {item.stock}
+                        {item.name} - Tồn kho: {item.stockQuantity}
                     </li>
                 ))}
             </ul>

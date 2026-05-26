@@ -18,14 +18,14 @@ export function useInventory() {
         try {
             const token = localStorage.getItem('user-token')
 
-            const targetProduct = product.find(item => item.id == id);
+            const targetProduct = products.find(item => item.id == id);
             if (!targetProduct) return;
 
             const newStock = targetProduct.stockQuantity + amount
             const safeStock = newStock >= 0 ? newStock : 0;
 
             // 1. Gửi request POST kèm body sang API Login công khai
-            const response = await fetch('http://localhost:5105/api/Products/${id}', {
+            const response = await fetch(`http://localhost:5105/api/Products/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export function useInventory() {
                 throw new Error('Không thể cập nhật số lượng trên Server!');
             }
 
-            setProducts(product.map(item => {
+            setProducts(products.map(item => {
                 if (item.id === id) {
                     return { ...item, stockQuantity: safeStock };
                 }
@@ -60,14 +60,41 @@ export function useInventory() {
         }
     }
 
-    const handleAdd = (newProduct) => {
-        const productWithId = {
-            ...newProduct,       // Copy name và stock từ Form truyền lên
-            id: Date.now()       // Tự tạo ID duy nhất bằng thời gian
-        };
+    const handleAdd = async (newProduct) => {
+        try {
+            const currentToken = localStorage.getItem('user-token')
+            // Chuẩn hóa dữ liệu: Nếu ID bằng 0 hoặc rỗng, chuyển thành null để tránh lỗi Foreign Key ở Backend
+            const safeCategoryId = Number(newProduct.categoryId) > 0 ? Number(newProduct.categoryId) : null;
+            const safeSupplierId = Number(newProduct.supplierId) > 0 ? Number(newProduct.supplierId) : null;
 
-        // Cập nhật mảng products bằng cách thêm phần tử mới vào cuối
-        setProducts([...products, productWithId]);
+            const response = await fetch('http://localhost:5105/api/Products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentToken}`
+                },
+                body: JSON.stringify({
+                    name: newProduct.name,
+                    sku: newProduct.sku.trim() || `SKU-${Date.now()}`,
+                    price: Number(newProduct.price) || 0,
+                    stockQuantity: Number(newProduct.stock) || 0,
+                    categoryId: safeCategoryId,
+                    supplierId: safeSupplierId
+                })
+            });
+
+            if (!response.ok) throw new Error('Không thể thêm sản phẩm lên Server!');
+            const createdProduct = await response.json();
+
+            setProducts([...products, createdProduct]);
+            alert('Thêm sản phẩm thành công!');
+            return true; // Báo hiệu cho Form biết đã thêm thành công vào Database
+
+        } catch (error) {
+            console.error('Lỗi API:', error.message);
+            alert(error.message);
+            return false; // Báo hiệu thất bại
+        }
     };
 
     const handleLogin = async (username, password) => {
@@ -141,5 +168,5 @@ export function useInventory() {
         };
     }
 
-    return { products, loading, handleUpdateStock, handleAdd, handleLogin }
+    return { products, loading, token, handleUpdateStock, handleAdd, handleLogin };
 }
