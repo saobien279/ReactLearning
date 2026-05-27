@@ -11,8 +11,7 @@ import ProtectedRoute from './pages/ProtectedRoute';
 import { useInventory } from './hooks/useInventory';
 
 function App() {
-  // SỬA TẠI ĐÂY: Thêm dấu () để thực thi Hook
-  const { products, loading, token, handleAdd, handleUpdateStock, handleLogin } = useInventory();
+  const { products, loading, token, handleAdd, handleUpdateStock, handleLogin , handleDelete} = useInventory();
 
   return (
     <>
@@ -34,10 +33,10 @@ function App() {
         ) : (
           <Routes>
             <Route path="/" element={<ProtectedRoute><Home products={products} /></ProtectedRoute>} />
-            <Route path="/inventory" element={<ProtectedRoute><Inventory handleUpdateStock={handleUpdateStock} products={products} /></ProtectedRoute>} />
+            <Route path="/inventory" element={<ProtectedRoute><Inventory handleUpdateStock={handleUpdateStock} products={products} handleDelete={handleDelete} /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="/add" element={<ProtectedRoute><AddProductForm onAdd={handleAdd} /></ProtectedRoute>} />
-            <Route path="/login" element={<Login onSubmit={handleLogin} />} />
+            <Route path="/add" element={<ProtectedRoute><AddProductForm handleAdd={handleAdd} /></ProtectedRoute>} />
+            <Route path="/login" element={<Login handleLogin={handleLogin} />} />
             <Route path="*" element={<div><h1>404</h1><p>Hệ thống không tìm thấy trang này!</p></div>} />
           </Routes>
         )}

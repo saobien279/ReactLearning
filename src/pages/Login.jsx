@@ -1,13 +1,13 @@
 import { useState } from 'react';
 
 
-function Login({ onSubmit }) {
+function Login({ handleLogin }) {
     // 1. Quản lý dữ liệu người dùng nhập vào Form
     const [credentials, setCredentials] = useState({ username: '', password: '' });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(credentials.username, credentials.password)
+        handleLogin(credentials.username, credentials.password)
         console.log('Dữ liệu nhập vào:', credentials);
     };
 

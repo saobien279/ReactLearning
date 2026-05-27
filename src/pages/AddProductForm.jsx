@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function AddProductForm({ onAdd }) {
+function AddProductForm({ handleAdd }) {
     const navigate = useNavigate();
     const [Form, setForm] = useState({ name: "", sku: "", price: 0, stock: 0, categoryId: 0, supplierId: 0 });
 
@@ -13,7 +13,7 @@ function AddProductForm({ onAdd }) {
             return;
         }
 
-        const isSuccess = await onAdd(Form);
+        const isSuccess = await handleAdd(Form);
 
         if (isSuccess) {
             setForm({ name: "", sku: "", price: 0, stock: 0, categoryId: 0, supplierId: 0 });

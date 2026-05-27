@@ -1,15 +1,31 @@
 import { Navigate } from 'react-router-dom';
 
 function ProtectedRoute({ children }) {
-  // 1. Kiểm tra sự tồn tại của Token trong bộ nhớ trình duyệt
   const token = localStorage.getItem('user-token');
 
-  // 2. Nếu KHÔNG có token, đá văng người dùng về thẳng trang /login ngay lập tức
-  if (!token) {
+  // Hàm decode dữ liệu tĩnh, không phụ thuộc vào Hook
+  const isTokenExpired = (encodedToken) => {
+    if (!encodedToken) return true;
+    try {
+      const base64Url = encodedToken.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => 
+        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      ).join(''));
+      
+      const payload = JSON.parse(jsonPayload);
+      return Math.floor(Date.now() / 1000) > payload.exp;
+    } catch {
+      return true;
+    }
+  };
+
+  // CHỐT CHẶN: Không có token HOẶC token hết hạn -> Xóa ổ cứng và đá về login
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem('user-token');
     return <Navigate to="/login" replace />;
   }
 
-  // 3. Nếu CÓ token, cho phép render nội dung trang con (children) bên trong
   return children;
 }
 

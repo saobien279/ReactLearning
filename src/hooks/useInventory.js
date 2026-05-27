@@ -13,6 +13,7 @@ export function useInventory() {
     }, [token]);
 
 
+
     const handleUpdateStock = async (id, amount) => {
 
         try {
@@ -168,5 +169,33 @@ export function useInventory() {
         };
     }
 
-    return { products, loading, token, handleUpdateStock, handleAdd, handleLogin };
+    const handleDelete = async (id) => {
+        if(!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) return;
+
+        try {
+            const currentToken = localStorage.getItem('user-token');
+
+            // 1. Gọi API DELETE lên Server bảo mật
+            const response = await fetch(`http://localhost:5105/api/Products/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${currentToken}` // Quyền Admin
+                }
+            });
+
+            // Nếu User thường xóa sẽ dính lỗi 403 Forbidden từ Backend của bạn
+            if (!response.ok) {
+                throw new Error('Xóa thất bại! Có thể bạn không có quyền Admin hoặc sản phẩm không tồn tại.');
+            }
+
+            setProducts(products.filter(item => item.id !== id))
+            alert('Xóa sản phẩm khỏi Database thành công!');
+
+        } catch (error) {
+            console.error('Lỗi API:', error.message);
+            alert(error.message);
+        }
+    }
+
+    return { products, loading, token, handleUpdateStock, handleAdd, handleLogin, handleDelete, };
 }
